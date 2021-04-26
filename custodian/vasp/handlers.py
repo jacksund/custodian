@@ -295,7 +295,7 @@ class VaspErrorHandler(ErrorHandler):
             # being too big and POTIM should be decreased.  If a static run
             # try turning off symmetry.
             try:
-                oszicar = Oszicar("OSZICAR")
+                oszicar = Oszicar(os.path.join("01", "OSZICAR"))  # BUG: jacksund changed for NEB
                 nsteps = len(oszicar.ionic_steps)
             except Exception:
                 nsteps = 0
@@ -310,7 +310,8 @@ class VaspErrorHandler(ErrorHandler):
             ):
                 actions.append({"dict": "INCAR", "action": {"_set": {"ISYM": 0}}})
             else:
-                s = vi["POSCAR"].structure
+                # s = vi["POSCAR"].structure # BUG: jacksund changed for NEB
+                s = Structure.from_file(os.path.join("01", "POSCAR")) # BUG: jacksund changed for NEB
                 s.apply_strain(0.2)
                 actions.append(
                     {"dict": "POSCAR", "action": {"_set": {"structure": s.as_dict()}}}
@@ -336,7 +337,7 @@ class VaspErrorHandler(ErrorHandler):
             self.error_count["subspacematrix"] += 1
 
         if self.errors.intersection(["rspher", "real_optlay", "nicht_konv"]):
-            s = vi["POSCAR"].structure
+            s = Structure.from_file(os.path.join("01", "POSCAR"))  # BUG: jacksund changed for NEB
             if len(s) < self.natoms_large_cell:
                 actions.append({"dict": "INCAR", "action": {"_set": {"LREAL": False}}})
             else:
